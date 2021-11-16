@@ -12,14 +12,9 @@ struct heap{
     void** arreglo;
     size_t capacidad;
     size_t cantidad;
-    cmp_func_t* cmp;
+    cmp_func_t cmp;
 };
 
-// -----------------------------------------------------------------
-// -------------------------- Heap Sort ----------------------------
-// -----------------------------------------------------------------
-
-void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){}
 
 // -----------------------------------------------------------------
 // ------------------ Funciones Auxiliares Heap --------------------
@@ -27,17 +22,19 @@ void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){}
 
 int hijo_izq(size_t pos, size_t cantidad){
     size_t pos_h_izq = (2*pos) + 1;
-    return (pos_h_izq < cantidad) ? pos_h_izq : -1;
+    return (pos_h_izq < cantidad) ? (int) pos_h_izq : -1;
 }
 
 int hijo_der(size_t pos, size_t cantidad){
     size_t pos_h_der = (2*pos) + 2;
-    return (pos_h_der < cantidad) ? pos_h_der : -1;
+    return (pos_h_der < cantidad) ? (int) pos_h_der : -1;
 }
 
 int padre(size_t pos){
-    size_t pos_padre = (pos - 1) / 2;
-    return (pos_padre >= 0) ? pos_padre : -1;
+    if(pos == 0){
+        return -1;
+    }
+    return (int) (pos - 1) / 2;
 }
 
 void swap(void* elemento_1, void* elemento_2){
@@ -69,7 +66,7 @@ void upheap(void** arreglo, size_t posicion_elemento, size_t cantidad, cmp_func_
     swap(elemento_upheap, padre_upheap);
 
     // Llamo nuevamente a la funcion
-    upheap(arreglo, posicion_padre, cantidad, cmp);
+    upheap(arreglo, (size_t) posicion_padre, cantidad, cmp);
 }
 
 int hijo_mayor(int posicion_hijo_izq, int posicion_hijo_der, void** arreglo, cmp_func_t cmp){
@@ -110,16 +107,12 @@ void downheap(void** arreglo, size_t posicion_elemento, size_t cantidad, cmp_fun
     swap(elemento_downheap, elemento_hijo_mayor);
 
     // Llamo nuevamente a la funcion
-    upheap(arreglo, posicion_hijo_mayor, cantidad, cmp);
+    upheap(arreglo,(size_t) posicion_hijo_mayor, cantidad, cmp);
 }
 
 // -----------------------------------------------------------------
 // ----------------------- Primitivas Heap -------------------------
 // -----------------------------------------------------------------
-
-heap_t *heap_crear(cmp_func_t cmp){
-    return _heap_crear(cmp, CAPACIDAD_INICIAL);
-}
 
 heap_t *_heap_crear(cmp_func_t cmp, size_t capacidad_inicial){
     // Solicito memoria para alojar el heap
@@ -130,7 +123,7 @@ heap_t *_heap_crear(cmp_func_t cmp, size_t capacidad_inicial){
     heap->arreglo = malloc(sizeof(void*) * capacidad_inicial);
     if (!heap->arreglo){
         free(heap);
-        return;
+        return NULL;
     }
     // Inicializo los parametros del heap
     heap->capacidad = capacidad_inicial;
@@ -138,6 +131,10 @@ heap_t *_heap_crear(cmp_func_t cmp, size_t capacidad_inicial){
     heap->cmp = cmp;
 
     return heap;
+}
+
+heap_t *heap_crear(cmp_func_t cmp){
+    return _heap_crear(cmp, CAPACIDAD_INICIAL);
 }
 
 heap_t *heap_crear_arr(void *arreglo[], size_t n, cmp_func_t cmp){
@@ -151,8 +148,8 @@ heap_t *heap_crear_arr(void *arreglo[], size_t n, cmp_func_t cmp){
         heap->cantidad++;
     }
     // Hago downheap del ultimo elemento al primero
-    for (size_t j = heap->cantidad - 1; j >= 0; j--){
-        downheap(heap->arreglo, j, heap->cantidad - j, heap->cmp);
+    for (int j = (int) heap->cantidad - 1; j >= 0; j--){
+        downheap(heap->arreglo,(size_t) j, heap->cantidad - (size_t) j, heap->cmp);
     }
     return heap;
 }
@@ -210,3 +207,21 @@ void *heap_desencolar(heap_t *heap){
 
     return elemento_desencolado;
 }
+
+
+// -----------------------------------------------------------------
+// -------------------------- Heap Sort ----------------------------
+// -----------------------------------------------------------------
+/*
+void heapify(void *elementos[], size_t cant, cmp_func_t cmp){
+    for(int i = (int) cant; i >= 0; i--){
+        downheap(elementos, i, cant, cmp);
+    }
+}
+
+void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){
+    for(int i = (int) cant; i >= 0; i--){
+        heapify(elementos, cant, cmp);
+    }
+}
+*/
