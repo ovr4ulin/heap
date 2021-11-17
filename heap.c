@@ -1,6 +1,7 @@
 #include "heap.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define CAPACIDAD_INICIAL 20
 
@@ -37,10 +38,10 @@ int padre(size_t pos){
     return (int) (pos - 1) / 2;
 }
 
-void swap(void* elemento_1, void* elemento_2){
-    void* aux = elemento_1;
-    elemento_1 = elemento_2;
-    elemento_2 = aux;
+void swap(void **arreglo, size_t posicion1, size_t posicion2){
+    void *aux = arreglo[posicion1];
+    arreglo[posicion1] = arreglo[posicion2];
+    arreglo[posicion2] = aux;
 }
 
 bool heap_redimensionar(heap_t* heap, size_t nueva_capacidad){
@@ -63,7 +64,7 @@ void upheap(void** arreglo, size_t posicion_elemento, size_t cantidad, cmp_func_
     if (cmp(padre_upheap, elemento_upheap) >= 0) return;
 
     // Realizo el swap
-    swap(elemento_upheap, padre_upheap);
+    swap(arreglo, posicion_elemento, (size_t) posicion_padre);
 
     // Llamo nuevamente a la funcion
     upheap(arreglo, (size_t) posicion_padre, cantidad, cmp);
@@ -104,10 +105,10 @@ void downheap(void** arreglo, size_t posicion_elemento, size_t cantidad, cmp_fun
     if (cmp(elemento_downheap, elemento_hijo_mayor) >= 0) return;
 
     // Realizo el swap
-    swap(elemento_downheap, elemento_hijo_mayor);
+    swap(arreglo, posicion_elemento, (size_t) posicion_hijo_mayor);
 
     // Llamo nuevamente a la funcion
-    upheap(arreglo,(size_t) posicion_hijo_mayor, cantidad, cmp);
+    downheap(arreglo,(size_t) posicion_hijo_mayor, cantidad, cmp);
 }
 
 // -----------------------------------------------------------------
@@ -198,7 +199,7 @@ void *heap_desencolar(heap_t *heap){
     void* elemento_desencolado = heap->arreglo[0];
 
     // Hago un swap del primer elemento con el ultimo, disminuyo la cant en uno y le hago down heap a la raiz
-    swap(heap->arreglo[0], heap->arreglo[heap->cantidad - 1]);
+    swap(heap->arreglo, 0,  heap->cantidad - 1);
     heap->cantidad--;
     downheap(heap->arreglo, 0, heap->cantidad, heap->cmp);
 
@@ -212,16 +213,17 @@ void *heap_desencolar(heap_t *heap){
 // -----------------------------------------------------------------
 // -------------------------- Heap Sort ----------------------------
 // -----------------------------------------------------------------
-/*
+
 void heapify(void *elementos[], size_t cant, cmp_func_t cmp){
-    for(int i = (int) cant; i >= 0; i--){
-        downheap(elementos, i, cant, cmp);
+    for(size_t i =  cant; i > 0; i--){
+        downheap(elementos, i-1, cant, cmp);
     }
 }
 
 void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){
-    for(int i = (int) cant; i >= 0; i--){
-        heapify(elementos, cant, cmp);
+    heapify(elementos, cant, cmp);
+    for(size_t i = 0; i < cant; i++){
+        swap(elementos, 0, cant - 1 - i);
+        downheap(elementos, 0, cant - i -1, cmp);
     }
 }
-*/
